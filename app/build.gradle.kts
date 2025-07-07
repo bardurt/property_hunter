@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.testapp"
+    namespace = "com.bardur.domus"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.testapp"
+        applicationId = "com.bardur.domus.fo"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
