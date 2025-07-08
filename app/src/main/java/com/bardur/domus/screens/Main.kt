@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -109,36 +112,49 @@ fun MainScreen(navController: NavController, viewModel: PropertyViewModel) {
             AnimatedVisibility(
                 visible = showFilters
             ) {
-                FilterBar(
-                    cities = viewState.cityFilters,
-                    selectedCity = viewState.selectedCity,
-                    onCitySelected = {
-                        viewModel.performAction(
-                            PropertyViewModel.Action.FilterCity(
-                                it
+
+                Box(
+                    modifier = Modifier
+                        .heightIn(max = 300.dp)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    FilterBar(
+                        cities = viewState.cityFilters,
+                        selectedCity = viewState.selectedCity,
+                        onCitySelected = {
+                            viewModel.performAction(
+                                PropertyViewModel.Action.FilterCity(
+                                    it
+                                )
                             )
-                        )
-                    },
-                    selectedPriceRange = viewState.selectedPriceRange,
-                    onPriceRangeSelected = {
-                        viewModel.performAction(
-                            PropertyViewModel.Action.FilterPrice(
-                                it
+                        },
+                        selectedPriceRange = viewState.selectedPriceRange,
+                        onPriceRangeSelected = {
+                            viewModel.performAction(
+                                PropertyViewModel.Action.FilterPrice(
+                                    it
+                                )
                             )
-                        )
-                    },
-                    brokers = viewState.brokerList,
-                    selectedBroker = viewState.selectedBroker,
-                    onBrokerSelected = {
-                        viewModel.performAction(
-                            PropertyViewModel.Action.FilterBroker(
-                                it
+                        },
+                        brokers = viewState.brokerList,
+                        selectedBroker = viewState.selectedBroker,
+                        onBrokerSelected = {
+                            viewModel.performAction(
+                                PropertyViewModel.Action.FilterBroker(
+                                    it
+                                )
                             )
-                        )
-                    },
-                    bidStatus = viewState.bidActive,
-                    onBidSelected = { viewModel.performAction(PropertyViewModel.Action.FilterBid(it)) }
-                )
+                        },
+                        bidStatus = viewState.bidActive,
+                        onBidSelected = {
+                            viewModel.performAction(
+                                PropertyViewModel.Action.FilterBid(
+                                    it
+                                )
+                            )
+                        }
+                    )
+                }
             }
 
             LazyColumn(

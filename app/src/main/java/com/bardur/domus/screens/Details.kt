@@ -1,5 +1,7 @@
 package com.bardur.domus.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +24,7 @@ import com.bardur.domus.components.AffordabilityBadge
 import com.bardur.domus.model.Property
 import java.text.NumberFormat
 import java.util.*
+import androidx.core.net.toUri
 
 @Composable
 fun DetailsScreen(
@@ -50,7 +54,7 @@ fun DetailsScreen(
 @Composable
 fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
     val scrollState = rememberScrollState()
-
+    val context = LocalContext.current
     Column(
         modifier = modifier
             .verticalScroll(scrollState)
@@ -112,7 +116,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
             "N/A"
         }
 
-        if(formattedFairPrice.equals("N/A")){
+        if (formattedFairPrice.equals("N/A")) {
             Text(
                 text = "Fair Price: $formattedFairPrice",
                 style = MaterialTheme.typography.bodyLarge,
@@ -128,15 +132,33 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
             )
         }
 
+        if (property.size.isNotEmpty()) {
+            val pricePerMeter = property.listPrice.toDouble() / property.size.toDouble()
+
+            val formattedPricePerMeter = if (pricePerMeter > 0.0) {
+                NumberFormat.getNumberInstance(Locale.US)
+                    .format(pricePerMeter.toInt())
+                    .replace(",", ".")
+            } else {
+                "N/A"
+            }
+
+            Text(
+                text = "Price per meter: ${formattedPricePerMeter} kr.",
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+        }
 
 
         if (property.buildYear.isNotEmpty()) {
             val currentYear = Calendar.getInstance().get(Calendar.YEAR)
             val buildYear = property.buildYear.toIntOrNull()
-            val age = if (buildYear != null && buildYear in 1800..currentYear) {
+            val age = if (buildYear != null && buildYear in 1200..currentYear) {
                 currentYear - buildYear
             } else {
-                null
+                "N/A"
             }
 
 
@@ -172,7 +194,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                 )
 
                 Text(
-                    text = age.toString() + " years",
+                    text = "$age years",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -212,6 +234,24 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
         if (property.latestBid.isNotEmpty()) {
             SectionTitle("Bidding Information")
             BidInfo(property = property)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        if (property.url.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                FilledTonalButton(
+                    onClick = {
+                        val url = property.url
+                        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text("See more")
+                }
+            }
         }
     }
 }

@@ -12,6 +12,7 @@ import com.bardur.domus.api.RetrofitClient
 import com.bardur.domus.api.Selection
 import com.bardur.domus.api.SkiftApi
 import com.bardur.domus.api.SkynApi
+import com.bardur.domus.model.Constants
 import com.bardur.domus.model.PriceRange
 import com.bardur.domus.model.Property
 import kotlinx.coroutines.CoroutineScope
@@ -37,59 +38,10 @@ class PropertyViewModel : ViewModel() {
     private var propertiesSkift: MutableList<Property> = mutableListOf()
 
 
-    private var brokerList: List<String> =
-        listOf("All", "Skyn", "Meklarin", "Betri Heim", "Skift", "Ogn")
-
-
-    val cityAverageRatios = mapOf(
-        "Argir" to 4.5,
-        "Eiði" to 3.8,
-        "Froðba" to 2.5,
-        "Funningur" to 3.2,
-        "Glyvrar" to 3.8,
-        "Hoyvík" to 5.0,
-        "Hvalba" to 2.3,
-        "Hvalvík" to 3.4,
-        "Húsavík" to 3.2,
-        "Kaldbak" to 3.3,
-        "Klaksvík" to 4.1,
-        "Kollafjørður" to 3.4,
-        "Kvívík" to 3.3,
-        "Langasandur" to 3.1,
-        "Leirvík" to 3.5,
-        "Leynar" to 3.4,
-        "Miðvágur" to 3.8,
-        "Nes" to 4.0,
-        "Norðoyri" to 3.0,
-        "Norðskáli" to 3.2,
-        "Nólsoy" to 3.2,
-        "Oyri" to 3.2,
-        "Porkeri" to 2.6,
-        "Rituvík" to 3.5,
-        "Runavík" to 4.2,
-        "Saltangará" to 4.2,
-        "Sandavágur" to 3.6,
-        "Sandur" to 3.2,
-        "Skipanes" to 3.5,
-        "Skála" to 3.7,
-        "Sumba" to 2.1,
-        "Syðrugøta" to 3.6,
-        "Søldarfjørður" to 3.5,
-        "Toftir" to 4.0,
-        "Trongisvágur" to 2.4,
-        "Tvøroyri" to 2.8,
-        "Tvøroyri - Froðba" to 2.8,
-        "Tórshavn" to 5.8,
-        "Velbastaður" to 4.0,
-        "Vestmanna" to 3.7,
-        "Vágur" to 2.8,
-        "Ørðavík" to 2.1
-    )
-
-
-    private var selectedBroker = "All"
+    private val filterAll = "All"
+    private var selectedBroker = filterAll
     private var cityList: MutableList<String> = mutableListOf()
-    private var selectedCity = "All"
+    private var selectedCity = filterAll
     private var selectedPriceRange: PriceRange = PriceRange.ALL
     private var filterBid = false
 
@@ -144,7 +96,7 @@ class PropertyViewModel : ViewModel() {
                     totalList.addAll(propertiesMeklarin)
                     totalList.addAll(propertiesSkift)
                     displayList.addAll(totalList)
-                    cityList.add("All")
+                    cityList.add(filterAll)
                     for (s in cityList) {
                         println(s)
                     }
@@ -169,7 +121,7 @@ class PropertyViewModel : ViewModel() {
                             selectedCity = selectedCity,
                             selectedPriceRange = selectedPriceRange,
                             selectedBroker = selectedBroker,
-                            brokerList = brokerList
+                            brokerList = Constants.brokerList
                         )
                     }
                 }
@@ -204,7 +156,7 @@ class PropertyViewModel : ViewModel() {
     }
 
     private fun applyFilters() {
-        val cityFiltered = if (selectedCity == null || selectedCity == "All") {
+        val cityFiltered = if (selectedCity == null || selectedCity == filterAll) {
             totalList
         } else {
             totalList.filter { it.city == selectedCity }
@@ -391,7 +343,10 @@ class PropertyViewModel : ViewModel() {
 
         if (age in 2..119) {
 
-            val targetRatio = cityAverageRatios[property.city] ?: 4.0
+            val targetRatio = Constants.areaCosts
+                .find { it.name == property.city }
+                ?.ratio
+                ?: 4.0
 
             val adjustedPrice = calculateAdjustedPrice(
                 income = income,

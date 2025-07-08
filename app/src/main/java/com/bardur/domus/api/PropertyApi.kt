@@ -4,6 +4,7 @@ import com.bardur.domus.model.Property
 import org.json.JSONArray
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import java.net.URLDecoder
 
 interface PropertyApi {
     fun getProperties(): List<Property>
@@ -31,7 +32,7 @@ object OgnApi : PropertyApi {
                 }
                 var latestBid = ""
                 var latestBidValidity = ""
-                val buildYear = ""
+                var buildYear = ""
 
                 val imageUrl: String = ("https://ogn.fo/" + child?.selectFirst("img")?.attr("src"))
                 var address: String =
@@ -65,6 +66,22 @@ object OgnApi : PropertyApi {
                     latestBidValidity = date
                 }
 
+
+                var size = child
+                    .selectFirst(".properties--icon--size")?.text()?.trim() ?: ""
+
+
+
+                if (size.trim().equals("-")) {
+                    size = ""
+                }
+
+                buildYear = child.selectFirst(".properties--icon--year")?.text()?.trim() ?: ""
+
+                if (buildYear.trim().equals("-")) {
+                    buildYear = ""
+                }
+
                 val p = Property(
                     address = address,
                     city = city,
@@ -75,6 +92,7 @@ object OgnApi : PropertyApi {
                     image = imageUrl,
                     broker = "Ogn",
                     biddingActive = latestBid.isNotEmpty(),
+                    size = size,
                     id = "ogn$index"
                 )
 
@@ -92,6 +110,23 @@ object OgnApi : PropertyApi {
 
 object SkiftApi : PropertyApi {
 
+
+    fun extractFirstSize(html: String): String? {
+        val document = Jsoup.parse(html)
+
+        // Select all size containers
+        val sizeDivs = document.select(".property-card--size > div:not(.icon-container)")
+
+        for (div in sizeDivs) {
+            val text = div.text()
+            val regex = Regex("""\d+""")
+            val match = regex.find(text)
+            if (match != null) {
+                return match.value
+            }
+        }
+        return null
+    }
 
     override fun getProperties(): List<Property> {
 
@@ -123,7 +158,7 @@ object SkiftApi : PropertyApi {
                 val pricesSection = infoSection?.selectFirst("div.property-card--prices-container")
                 val addressSection = infoSection?.selectFirst("div.property-card--text-info")
                 val imageSection = child?.selectFirst("div.property-card--image-container")
-                val sizesSection =  child?.selectFirst("div.property-card--sizes")
+                val sizesSection = child?.selectFirst("div.property-card--sizes")
 
 
                 val yearDiv: Element? = sizesSection?.selectFirst(
@@ -136,6 +171,8 @@ object SkiftApi : PropertyApi {
                 } else {
                     println("Build year not found.")
                 }
+
+                var size = extractFirstSize(sizesSection.toString()) ?: ""
 
                 imageUrl = imageSection?.selectFirst("img")?.attr("src") ?: ""
                 address = addressSection?.selectFirst("h5")?.text()?.trim() ?: ""
@@ -153,6 +190,7 @@ object SkiftApi : PropertyApi {
                     image = imageUrl,
                     broker = "Skift",
                     biddingActive = latestBid.isNotEmpty(),
+                    size = size,
                     id = "skift$index"
                 )
 
@@ -192,6 +230,7 @@ object BetriHeimApi : PropertyApi {
                 var latestBidValidity = ""
                 var buildYear = ""
                 var imageUrl = ""
+                var size = ""
 
                 val infoSection = child.selectFirst("section.info")
                 val factsSection = child.selectFirst("section.facts")
@@ -220,13 +259,22 @@ object BetriHeimApi : PropertyApi {
                         factsSection.selectFirst("div.date")?.text()?.trim()?.replace("Bygd ", "")
                             ?: ""
 
-                    if(buildYear.contains("/")){
-                        buildYear = buildYear.split("/")[0];
+                    if (buildYear.contains("/")) {
+                        buildYear = buildYear.split("/")[0]
                     }
 
-                    if(buildYear.equals("null", ignoreCase = true)){
+                    if (buildYear.equals("null", ignoreCase = true)) {
                         buildYear = ""
                     }
+
+                    var sizeDiv = factsSection.selectFirst("div.building-size")
+
+                    var sizeString = sizeDiv?.text()?.trim() ?: ""
+
+
+                    val regex = Regex("""\d+""")
+                    val match = regex.find(sizeString)
+                    size = match?.value ?: ""
                 }
 
                 val city = address.trim().split("\\s+".toRegex()).last()
@@ -246,6 +294,7 @@ object BetriHeimApi : PropertyApi {
                     image = imageUrl,
                     broker = "Betri Heim",
                     biddingActive = latestBid.isNotEmpty(),
+                    size = size,
                     id = "betri$index"
                 )
 
@@ -289,6 +338,13 @@ object MeklarinApi : PropertyApi {
                 for (i in 0 until jsonArray.length()) {
                     val obj = jsonArray.getJSONObject(i)
 
+
+                    val raw = obj.optString("build")
+
+                    val regex = Regex("""\d+""")
+                    val match = regex.find(raw)
+                    val year = match?.value ?: ""
+
                     if (!obj.getBoolean("sold")) {
                         val bid = obj.optString("bid").replace(".", "")
                         val property = Property(
@@ -296,13 +352,14 @@ object MeklarinApi : PropertyApi {
                             city = obj.optString("city"),
                             url = obj.optString("permalink"),
                             image = obj.optString("featured_image"),
-                            buildYear = obj.optString("build"),
+                            buildYear = year,
                             latestBid = bid,
                             bidValidUntil = obj.optString("bid_valid_until"),
                             listPrice = obj.optString("price").replace(".", ""),
                             broker = "Meklarin",
                             priceIncomeRatio = 0.0,
                             biddingActive = bid.isNotEmpty(),
+                            size = obj.optString("house_area").replace(".", ""),
                             id = "meklarin$i"
                         )
                         properties.add(property)
@@ -316,6 +373,7 @@ object MeklarinApi : PropertyApi {
 }
 
 object SkynApi : PropertyApi {
+
     override fun getProperties(): List<Property> {
         val doc = Jsoup.connect("https://www.skyn.fo/ognir-til-soelu").get()
         val properties = doc.select("div.col-md-6.col-sm-6.col-xs-12.col-lg-4.ogn:not(.sold)")
@@ -339,6 +397,21 @@ object SkynApi : PropertyApi {
             val validUntil = el.select(".latest-bid .validto").text().removePrefix("galdandi til ")
             val listPrice = el.select(".latest-bid .listprice").text().replace(".", "")
 
+            val img = el.select("img.prop-size").first()
+
+            val div = img?.parent()
+
+            // Get the text directly inside the div (skipping the <img> and <sup>)
+            val ownText = div?.ownText()?.trim()
+
+            var size = ownText?.replace("m", "")?.trim() ?: ""
+
+            try {
+                size.toDouble()
+            } catch (e: Exception) {
+                size = ""
+            }
+
             val property = Property(
                 address = title,
                 city = address,
@@ -349,6 +422,7 @@ object SkynApi : PropertyApi {
                 bidValidUntil = validUntil,
                 broker = "Skyn",
                 biddingActive = latestBid.isNotEmpty(),
+                size = size,
                 id = "skyn$index"
             )
             index++

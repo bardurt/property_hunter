@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -57,8 +58,8 @@ fun FilterBar(
                     label = "City",
                     options = cities,
                     selectedOption = selectedCity,
-                    onOptionSelected = { onCitySelected(it.toString()) },
-                    optionToString = { it ?: "All" }
+                    onOptionSelected = { onCitySelected(it) },
+                    optionToString = { it },
                 )
             }
 
@@ -98,10 +99,10 @@ fun FilterBar(
             ) {
                 DropdownMenuFilter(
                     label = "Score",
-                    options = PriceRange.values().toList(),
+                    options = PriceRange.entries,
                     selectedOption = selectedPriceRange,
                     onOptionSelected = { onPriceRangeSelected(it ?: PriceRange.ALL) },
-                    optionToString = { it?.displayName ?: "All" }
+                    optionToString = { it.displayName ?: "All" }
                 )
             }
 
