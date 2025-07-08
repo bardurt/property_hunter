@@ -17,5 +17,6 @@ data class Property(
     var bidIncomeRatio: Double = 0.0,
     var fairPrice: Double = 0.0,
     var size: String = "",
-    val id: String = ""
+    val id: String = "",
+    var showScore : Boolean = true,
 )

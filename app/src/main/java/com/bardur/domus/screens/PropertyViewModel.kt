@@ -315,6 +315,14 @@ class PropertyViewModel : ViewModel() {
         property.priceIncomeAgeRatio = ratio.toDouble() + ageFactor
 
         property.score = (property.priceIncomeAgeRatio + property.priceIncomeRatio) / 2
+
+        if(property.score < 1.0){
+            property.showScore = false;
+        }
+
+        if(property.score > 10){
+            property.showScore = false;
+        }
     }
 
     private fun calculateIncomeBidRatio(income: Double, property: Property) {

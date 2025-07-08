@@ -108,30 +108,6 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.secondary
         )
 
-        val formattedFairPrice = if (property.fairPrice > 0.0) {
-            NumberFormat.getNumberInstance(Locale.US)
-                .format(property.fairPrice)
-                .replace(",", ".")
-        } else {
-            "N/A"
-        }
-
-        if (formattedFairPrice.equals("N/A")) {
-            Text(
-                text = "Fair Price: $formattedFairPrice",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-        } else {
-            Text(
-                text = "Fair Price: $formattedFairPrice kr.",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-        }
-
         if (property.size.isNotEmpty()) {
             val pricePerMeter = property.listPrice.toDouble() / property.size.toDouble()
 
@@ -147,8 +123,35 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                 text = "Price per meter: ${formattedPricePerMeter} kr.",
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.secondary
             )
+        }
+
+        if(property.showScore) {
+
+            val formattedFairPrice = if (property.fairPrice > 0.0) {
+                NumberFormat.getNumberInstance(Locale.US)
+                    .format(property.fairPrice)
+                    .replace(",", ".")
+            } else {
+                "N/A"
+            }
+
+            if (formattedFairPrice.equals("N/A")) {
+                Text(
+                    text = "Fair Price: $formattedFairPrice",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            } else {
+                Text(
+                    text = "Fair Price: $formattedFairPrice kr.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
         }
 
 
@@ -203,33 +206,34 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            SectionTitle("Affordability Metrics")
+        if(property.showScore) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                SectionTitle("Affordability Metrics")
 
-            MetricRow(
-                label = "Price / Household Income",
-                value = property.priceIncomeRatio,
-                badgeValue = property.priceIncomeRatio
-            )
+                MetricRow(
+                    label = "Price / Household Income",
+                    value = property.priceIncomeRatio,
+                    badgeValue = property.priceIncomeRatio
+                )
 
-            MetricRow(
-                label = "Age-adjusted Price / Household Income",
-                value = property.priceIncomeAgeRatio,
-                badgeValue = property.priceIncomeAgeRatio
-            )
+                MetricRow(
+                    label = "Age-adjusted Price / Household Income",
+                    value = property.priceIncomeAgeRatio,
+                    badgeValue = property.priceIncomeAgeRatio
+                )
 
-            MetricRow(
-                label = "Score",
-                value = property.score,
-                badgeValue = property.score
-            )
+                MetricRow(
+                    label = "Score",
+                    value = property.score,
+                    badgeValue = property.score
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         if (property.latestBid.isNotEmpty()) {
             SectionTitle("Bidding Information")

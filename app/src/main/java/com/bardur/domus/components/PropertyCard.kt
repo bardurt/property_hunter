@@ -38,6 +38,7 @@ import coil.compose.AsyncImagePainter.State.Empty.painter
 import com.bardur.domus.R
 import com.bardur.domus.api.Column
 import com.bardur.domus.components.AffordabilityBadge
+import com.bardur.domus.components.AffordabilityHeatBar
 import com.bardur.domus.components.BidInfo
 import com.bardur.domus.model.Property
 import java.text.NumberFormat
@@ -72,31 +73,6 @@ fun PropertyCard(
 
                 Spacer(Modifier.weight(1f))
 
-                val affordability = if (property.score > 0.0) {
-                    String.format("%.2f", property.score)
-                } else {
-                    "N/A"
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Score: $affordability",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontSize = 18.sp
-                    )
-
-                    if (affordability != "N/A") {
-                        AffordabilityBadge(property.score)
-                    }
-
-                    IconButton(onClick = { onInfoClick() }) {
-                        androidx.compose.material3.Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "Info",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
             }
 
             AsyncImage(
@@ -107,6 +83,22 @@ fun PropertyCard(
                     .fillMaxWidth()
                     .height(200.dp)
             )
+
+            if (property.showScore) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.weight(1f)){
+                        AffordabilityHeatBar(property.score,
+                            modifier = Modifier.fillMaxWidth())
+                    }
+                    IconButton(onClick = { onInfoClick() }) {
+                        androidx.compose.material3.Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "Info",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -271,7 +263,7 @@ fun PropertyGrid(property: Property) {
 
                 val pricePerMeter = try {
                     property.listPrice.toDouble() / property.size.toDouble()
-                } catch (e : Exception){
+                } catch (e: Exception) {
                     0.0
                 }
                 val formattedPricePerMeter = if (pricePerMeter > 0.0) {
