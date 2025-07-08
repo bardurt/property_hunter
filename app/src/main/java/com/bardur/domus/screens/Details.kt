@@ -1,6 +1,5 @@
 package com.bardur.domus.screens
 
-import AffordabilityBadge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.bardur.domus.components.AffordabilityBadge
 import com.bardur.domus.model.Property
 import java.text.NumberFormat
 import java.util.*
@@ -234,7 +234,6 @@ fun BidInfo(property: Property) {
 
     val isActiveBid = bidAmount > 0.0
 
-    // Calculate percent difference from list price
     val percentDifference = if (bidAmount > 0 && listPrice > 0) {
         ((bidAmount - listPrice) / listPrice) * 100
     } else {

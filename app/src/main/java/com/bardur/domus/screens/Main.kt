@@ -1,6 +1,5 @@
 package com.bardur.domus.screens
 
-import InfoCard
 import PropertyCard
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.bardur.domus.components.FilterBar
+import com.bardur.domus.components.InfoCard
 import com.bardur.domus.components.PropertyCardShimmer
 import com.bardur.domus.model.Property
 
