@@ -1,4 +1,4 @@
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,19 +10,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.sharp.Home
 import androidx.compose.material.icons.sharp.Place
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,10 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter.State.Empty.painter
 import com.bardur.domus.R
-import com.bardur.domus.api.Column
-import com.bardur.domus.components.AffordabilityBadge
 import com.bardur.domus.components.AffordabilityHeatBar
 import com.bardur.domus.components.BidInfo
 import com.bardur.domus.model.Property
@@ -82,6 +74,7 @@ fun PropertyCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
+                    .clickable(enabled = true, onClick = {onDetailsClick()})
             )
 
             if (property.showScore) {
@@ -102,28 +95,31 @@ fun PropertyCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
-                text = property.address,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                androidx.compose.material3.Icon(
-                    imageVector = Icons.Sharp.Place,
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.tertiary
-                )
-                Spacer(modifier = Modifier.width(8.dp))
+            if(property.address.isNotEmpty()) {
                 Text(
-                    text = property.city,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.tertiary
+                    text = property.address,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            if(property.city.isNotEmpty()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Sharp.Place,
+                        contentDescription = "",
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = property.city,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
 
             PropertyGrid(property = property)
 
@@ -131,47 +127,10 @@ fun PropertyCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 BidInfo(property = property)
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                FilledTonalButton(
-                    onClick = { onDetailsClick() }
-                ) {
-                    Text("Details")
-                }
-            }
         }
     }
 }
 
-@Composable
-fun PricePerSquareMeterIcon() {
-    Box(
-        modifier = Modifier.size(24.dp)
-    ) {
-        androidx.compose.material3.Icon(
-            painter = painterResource(id = R.drawable.outline_resize),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.fillMaxSize()
-        )
-        androidx.compose.material3.Icon(
-            painter = painterResource(id = R.drawable.outline_money),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .size(12.dp)
-                .align(Alignment.Center)
-        )
-    }
-}
-
-
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PropertyGrid(property: Property) {
 
@@ -192,7 +151,7 @@ fun PropertyGrid(property: Property) {
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         androidx.compose.material3.Icon(
-                            imageVector = Icons.Sharp.Home,
+                            painter = painterResource(R.drawable.outline_construction),
                             contentDescription = "",
                             tint = MaterialTheme.colorScheme.tertiary
                         )
@@ -207,29 +166,31 @@ fun PropertyGrid(property: Property) {
                 }
             }
 
-            val listPrice = property.listPrice.toDoubleOrNull()
-            val formattedPrice = listPrice?.let {
-                NumberFormat.getNumberInstance(Locale.US).format(it)
-            }?.replace(",", ".") ?: "N/A"
+            property.listPrice.toDoubleOrNull()?.let {
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    androidx.compose.material3.Icon(
-                        painter = painterResource(id = R.drawable.outline_money),
-                        contentDescription = "",
-                        tint = MaterialTheme.colorScheme.tertiary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "$formattedPrice kr.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
+                val listPrice = property.listPrice.toDoubleOrNull()
+                val formattedPrice = listPrice?.let {
+                    NumberFormat.getNumberInstance(Locale.US).format(it)
+                }?.replace(",", ".") ?: "N/A"
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        androidx.compose.material3.Icon(
+                            painter = painterResource(id = R.drawable.outline_money),
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "$formattedPrice kr.",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
                 }
             }
         }
@@ -247,7 +208,7 @@ fun PropertyGrid(property: Property) {
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         androidx.compose.material3.Icon(
-                            painter = painterResource(id = R.drawable.outline_resize),
+                            painter = painterResource(id = R.drawable.outline_square_foot),
                             contentDescription = "",
                             tint = MaterialTheme.colorScheme.tertiary
                         )
@@ -280,7 +241,11 @@ fun PropertyGrid(property: Property) {
                         .fillMaxWidth()
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        PricePerSquareMeterIcon()
+                        androidx.compose.material3.Icon(
+                            painter = painterResource(id = R.drawable.outline_money),
+                            contentDescription = "",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "$formattedPricePerMeter kr/m²",

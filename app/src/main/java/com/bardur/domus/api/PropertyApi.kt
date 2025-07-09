@@ -1,6 +1,7 @@
 package com.bardur.domus.api
 
 import com.bardur.domus.model.Property
+import com.bardur.domus.model.PropertyType
 import org.json.JSONArray
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -13,13 +14,9 @@ interface PropertyApi {
 object OgnApi : PropertyApi {
 
     override fun getProperties(): List<Property> {
-
         val properties: MutableList<Property> = mutableListOf()
-
         val document = Jsoup.connect("https://ogn.fo/properties").get()
-
         val section: Element? = document.selectFirst("grid.properties--self.ease-edit.properties")
-
         if (section != null) {
             val allChildren = section.select("column.properties--property.ease-edit")
             var index = 1
@@ -91,7 +88,6 @@ object OgnApi : PropertyApi {
                     bidValidUntil = latestBidValidity,
                     image = imageUrl,
                     broker = "Ogn",
-                    biddingActive = latestBid.isNotEmpty(),
                     size = size,
                     id = "ogn$index"
                 )
@@ -111,7 +107,7 @@ object OgnApi : PropertyApi {
 object SkiftApi : PropertyApi {
 
 
-    fun extractFirstSize(html: String): String? {
+    private fun extractFirstSize(html: String): String? {
         val document = Jsoup.parse(html)
 
         // Select all size containers
@@ -189,7 +185,6 @@ object SkiftApi : PropertyApi {
                     bidValidUntil = latestBidValidity,
                     image = imageUrl,
                     broker = "Skift",
-                    biddingActive = latestBid.isNotEmpty(),
                     size = size,
                     id = "skift$index"
                 )
@@ -199,11 +194,8 @@ object SkiftApi : PropertyApi {
 
             }
         }
-
         return properties
-
     }
-
 }
 
 
@@ -267,9 +259,9 @@ object BetriHeimApi : PropertyApi {
                         buildYear = ""
                     }
 
-                    var sizeDiv = factsSection.selectFirst("div.building-size")
+                    val sizeDiv = factsSection.selectFirst("div.building-size")
 
-                    var sizeString = sizeDiv?.text()?.trim() ?: ""
+                    val sizeString = sizeDiv?.text()?.trim() ?: ""
 
 
                     val regex = Regex("""\d+""")
@@ -293,7 +285,6 @@ object BetriHeimApi : PropertyApi {
                     bidValidUntil = latestBidValidity,
                     image = imageUrl,
                     broker = "Betri Heim",
-                    biddingActive = latestBid.isNotEmpty(),
                     size = size,
                     id = "betri$index"
                 )
@@ -347,6 +338,22 @@ object MeklarinApi : PropertyApi {
 
                     if (!obj.getBoolean("sold")) {
                         val bid = obj.optString("bid").replace(".", "")
+
+                        val type = when (obj.getString("types")) {
+                            "Sethús" -> PropertyType.House
+                            "Íbúð" -> PropertyType.Apartment
+                            "Grundstykki" -> PropertyType.Land
+                            "Jørð" -> PropertyType.Land
+                            "Neyst" -> PropertyType.Shed
+                            else -> PropertyType.Unknown
+                        }
+
+                        var bidValidUntil = obj.optString("bid_valid_until")
+
+                        if (bidValidUntil.trim().equals(".")) {
+                            bidValidUntil = ""
+                        }
+
                         val property = Property(
                             address = obj.optString("address"),
                             city = obj.optString("city"),
@@ -358,9 +365,9 @@ object MeklarinApi : PropertyApi {
                             listPrice = obj.optString("price").replace(".", ""),
                             broker = "Meklarin",
                             priceIncomeRatio = 0.0,
-                            biddingActive = bid.isNotEmpty(),
-                            size = obj.optString("house_area").replace(".", ""),
-                            id = "meklarin$i"
+                            size = obj.optString("area_size").replace(".", ""),
+                            id = "meklarin$i",
+                            propertyType = type
                         )
                         properties.add(property)
                     }
@@ -421,7 +428,6 @@ object SkynApi : PropertyApi {
                 latestBid = latestBid,
                 bidValidUntil = validUntil,
                 broker = "Skyn",
-                biddingActive = latestBid.isNotEmpty(),
                 size = size,
                 id = "skyn$index"
             )

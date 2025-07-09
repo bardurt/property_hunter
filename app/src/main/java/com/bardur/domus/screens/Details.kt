@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -127,7 +130,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
             )
         }
 
-        if(property.showScore) {
+        if (property.showScore) {
 
             val formattedFairPrice = if (property.fairPrice > 0.0) {
                 NumberFormat.getNumberInstance(Locale.US)
@@ -206,7 +209,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if(property.showScore) {
+        if (property.showScore) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -276,7 +279,20 @@ fun BidInfo(property: Property) {
     val bidAmount = property.latestBid.replace(".", "").toDoubleOrNull() ?: 0.0
     val listPrice = property.listPrice.replace(".", "").toDoubleOrNull() ?: 0.0
 
-    val isActiveBid = bidAmount > 0.0
+    val isActiveBid = property.hasBid()
+    val isRejected = property.isBidRejected()
+
+    val backgroundColor = when {
+        isRejected -> MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+        isActiveBid -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+        else -> Color.Transparent
+    }
+
+    val textColor = when {
+        isRejected -> MaterialTheme.colorScheme.error
+        isActiveBid -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     val percentDifference = if (bidAmount > 0 && listPrice > 0) {
         ((bidAmount - listPrice) / listPrice) * 100
@@ -306,14 +322,57 @@ fun BidInfo(property: Property) {
             )
             .padding(12.dp)
     ) {
-        if (isActiveBid) {
-            Text(
-                text = "Active Bidding",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 4.dp)
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "Bid Info",
+                tint = textColor,
+                modifier = Modifier.size(20.dp)
             )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = "Bid Information",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        if (isActiveBid) {
+            if (isRejected) {
+                Text(
+                    text = "Rejected Bid",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
+            } else {
+                Text(
+                    text = "Active Bidding",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
+                )
+            }
+        } else if (isRejected) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Rejected",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "Bid rejected",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
 
         val price = property.latestBid.toDoubleOrNull()
@@ -321,20 +380,30 @@ fun BidInfo(property: Property) {
             NumberFormat.getNumberInstance(Locale.US).format(it)
         }?.replace(",", ".") ?: "N/A"
 
-        Text(
-            text = "Latest Bid: $formattedPrice kr.",
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = if (isActiveBid) FontWeight.Bold else FontWeight.SemiBold,
-            fontSize = 14.sp,
-            color = if (isActiveBid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Spacer(Modifier.height(4.dp))
 
         Text(
-            text = "Valid Until: ${property.bidValidUntil}.",
-            style = MaterialTheme.typography.bodySmall,
-            fontSize = 14.sp,
-            color = if (isActiveBid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            text = "Latest Bid: $formattedPrice kr.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = textColor,
+            fontWeight = FontWeight.Medium
         )
+
+        if (!isRejected && property.bidValidUntil.isNotEmpty()) {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "Valid Until: ${property.bidValidUntil}",
+                style = MaterialTheme.typography.bodySmall,
+                color = textColor
+            )
+        } else {
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "Status: Rejected",
+                style = MaterialTheme.typography.bodySmall,
+                color = textColor
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 

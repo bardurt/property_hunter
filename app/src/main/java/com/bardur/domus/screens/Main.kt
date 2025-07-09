@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -49,7 +49,7 @@ import com.bardur.domus.model.Property
 @Composable
 fun MainScreen(navController: NavController, viewModel: PropertyViewModel) {
     LaunchedEffect(Unit) {
-        viewModel.performAction(PropertyViewModel.Action.LoadUsers)
+        viewModel.performAction(PropertyViewModel.Action.LoadProperties)
     }
 
     val viewStateState = viewModel.viewState.collectAsState()
@@ -80,13 +80,6 @@ fun MainScreen(navController: NavController, viewModel: PropertyViewModel) {
                 }
             }
         }
-    } else if (properties.isEmpty()) {
-        EmptyStateScreen(
-            modifier = Modifier.fillMaxSize(),
-            onRetry = {
-                viewModel.performAction(PropertyViewModel.Action.LoadUsers)
-            }
-        )
     } else {
         var selectedProperty by remember { mutableStateOf<Property?>(null) }
         var showFilters by rememberSaveable { mutableStateOf(true) }
@@ -157,32 +150,67 @@ fun MainScreen(navController: NavController, viewModel: PropertyViewModel) {
                 }
             }
 
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    start = 8.dp,
-                    top = 8.dp,
-                    end = 8.dp,
-                    bottom = 32.dp
-                ),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    InfoCard(count = properties.size)
-                    Spacer(modifier = Modifier.height(8.dp))
+            if (properties.isNotEmpty()) {
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        start = 8.dp,
+                        top = 8.dp,
+                        end = 8.dp,
+                        bottom = 32.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        InfoCard(
+                            count = properties.size,
+                            bids = viewState.activeBids,
+                            rejectedBids = viewState.rejectedBids
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    items(properties, key = { it.id }) { property ->
+                        PropertyCard(
+                            property = property,
+                            onInfoClick = {
+                                selectedProperty = property
+                            },
+                            onDetailsClick = {
+                                viewModel.performAction(
+                                    PropertyViewModel.Action.SelectProperty(
+                                        property = property
+                                    )
+                                )
+                                navController.navigate(route = Screen.Details.route + "?id=${property.id}")
+                            }
+                        )
+                    }
                 }
-                items(properties, key = { it.id }) { property ->
-                    PropertyCard(
-                        property = property,
-                        onInfoClick = {
-                            selectedProperty = property
-                        },
-                        onDetailsClick = {
-                            viewModel.performAction(PropertyViewModel.Action.SelectProperty(property = property))
-                            navController.navigate(route = Screen.Details.route + "?id=${property.id}")
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(
+                        start = 8.dp,
+                        top = 8.dp,
+                        end = 8.dp,
+                        bottom = 32.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        InfoCard(
+                            count = properties.size,
+                            bids = viewState.activeBids,
+                            rejectedBids = viewState.rejectedBids
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    item {
+                        EmptyStateScreen {
+                            viewModel.performAction(PropertyViewModel.Action.Refresh)
                         }
-                    )
+                    }
                 }
             }
+
         }
         selectedProperty?.let { property ->
             PropertyInfoDialog(
@@ -284,7 +312,7 @@ fun EmptyStateScreen(
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.padding(32.dp)
+        modifier = modifier.padding(32.dp).fillMaxWidth()
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally

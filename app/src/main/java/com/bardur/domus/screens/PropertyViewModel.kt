@@ -15,6 +15,7 @@ import com.bardur.domus.api.SkynApi
 import com.bardur.domus.model.Constants
 import com.bardur.domus.model.PriceRange
 import com.bardur.domus.model.Property
+import com.bardur.domus.model.PropertyType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,15 +29,9 @@ class PropertyViewModel : ViewModel() {
 
     private val _viewState = MutableStateFlow(ViewState())
     val viewState: StateFlow<ViewState> = _viewState
-    var houseHoldIncome = 0.0
+    private var houseHoldIncome = 0.0
     private var displayList: MutableList<Property> = mutableListOf()
     private var totalList: MutableList<Property> = mutableListOf()
-    private var propertiesOgn: MutableList<Property> = mutableListOf()
-    private var propertiesSkyn: MutableList<Property> = mutableListOf()
-    private var propertiesMeklarin: MutableList<Property> = mutableListOf()
-    private var propertiesBetri: MutableList<Property> = mutableListOf()
-    private var propertiesSkift: MutableList<Property> = mutableListOf()
-
 
     private val filterAll = "All"
     private var selectedBroker = filterAll
@@ -49,82 +44,13 @@ class PropertyViewModel : ViewModel() {
 
     fun performAction(action: Action) {
         when (action) {
-            Action.LoadUsers -> {
+            Action.LoadProperties -> {
+                fetch()
+            }
 
-                if (loaded) {
-                    return
-                }
-
-                _viewState.value = _viewState.value.copy(loading = true)
-                CoroutineScope(Dispatchers.IO).launch {
-
-                    getHouseHoldIncome()
-                    getPropertiesOgn()
-                    getPropertiesSkyn()
-                    getPropertiesMeklarin()
-                    getPropertiesBetri()
-                    getPropertiesSkift()
-                    for (p in propertiesSkyn) {
-                        calculateIncomePriceRatio(houseHoldIncome, p)
-                        calculateIncomeBidRatio(income = houseHoldIncome, property = p)
-                        calculateFairPrice(income = houseHoldIncome, property = p)
-                    }
-                    for (p in propertiesMeklarin) {
-                        calculateIncomePriceRatio(houseHoldIncome, p)
-                        calculateIncomeBidRatio(income = houseHoldIncome, property = p)
-                        calculateFairPrice(income = houseHoldIncome, property = p)
-                    }
-                    for (p in propertiesBetri) {
-                        calculateIncomePriceRatio(houseHoldIncome, p)
-                        calculateIncomeBidRatio(income = houseHoldIncome, property = p)
-                        calculateFairPrice(income = houseHoldIncome, property = p)
-                    }
-                    for (p in propertiesSkift) {
-                        calculateIncomePriceRatio(houseHoldIncome, p)
-                        calculateIncomeBidRatio(income = houseHoldIncome, property = p)
-                        calculateFairPrice(income = houseHoldIncome, property = p)
-                    }
-                    for (p in propertiesOgn) {
-                        calculateIncomePriceRatio(houseHoldIncome, p)
-                        calculateIncomeBidRatio(income = houseHoldIncome, property = p)
-                        calculateFairPrice(income = houseHoldIncome, property = p)
-                    }
-
-                    totalList.addAll(propertiesOgn)
-                    totalList.addAll(propertiesSkyn)
-                    totalList.addAll(propertiesBetri)
-                    totalList.addAll(propertiesMeklarin)
-                    totalList.addAll(propertiesSkift)
-                    displayList.addAll(totalList)
-                    cityList.add(filterAll)
-                    for (s in cityList) {
-                        println(s)
-                    }
-                    val newCities = displayList.map { it.city }
-                        .filter { it.isNotBlank() }
-                        .distinct()
-                        .filterNot { it in cityList }
-
-                    cityList.addAll(newCities)
-
-                    cityList.sort()
-
-                    for (s in cityList) {
-                        println(s)
-                    }
-                    loaded = true
-                    withContext(Dispatchers.Main) {
-                        _viewState.value = _viewState.value.copy(
-                            loading = false,
-                            properties = displayList,
-                            cityFilters = cityList,
-                            selectedCity = selectedCity,
-                            selectedPriceRange = selectedPriceRange,
-                            selectedBroker = selectedBroker,
-                            brokerList = Constants.brokerList
-                        )
-                    }
-                }
+            is Action.Refresh -> {
+                loaded = false
+                fetch()
             }
 
             is Action.FilterCity -> {
@@ -177,8 +103,14 @@ class PropertyViewModel : ViewModel() {
             filtered.filter { it.broker == selectedBroker }
         }
 
+        var activeBids = ""
+        var rejectedBids = ""
         if (filterBid) {
-            filterd2 = filtered.filter { it.biddingActive }
+            filterd2 = filtered.filter { it.hasBid() }
+            filterd2 = filterd2.sortedBy { it.isBidRejected() }
+
+            activeBids = filterd2.size.toString()
+            rejectedBids = filterd2.filter { it.isBidRejected() }.size.toString()
         }
 
         _viewState.value = _viewState.value.copy(
@@ -187,7 +119,9 @@ class PropertyViewModel : ViewModel() {
             selectedCity = selectedCity,
             selectedPriceRange = selectedPriceRange,
             selectedBroker = selectedBroker,
-            bidActive = filterBid
+            bidActive = filterBid,
+            activeBids = activeBids,
+            rejectedBids = rejectedBids
         )
     }
 
@@ -240,7 +174,7 @@ class PropertyViewModel : ViewModel() {
             listOf()
         }
 
-        propertiesSkyn.addAll(items)
+        totalList.addAll(items)
     }
 
     private fun getPropertiesMeklarin() {
@@ -251,7 +185,7 @@ class PropertyViewModel : ViewModel() {
             listOf()
         }
 
-        propertiesMeklarin.addAll(items)
+        totalList.addAll(items)
     }
 
     private fun getPropertiesBetri() {
@@ -266,7 +200,7 @@ class PropertyViewModel : ViewModel() {
             it.city.isBlank() && it.address.isBlank() && it.listPrice.isBlank()
         }
 
-        propertiesBetri.addAll(filteredItems)
+        totalList.addAll(filteredItems)
     }
 
     private fun getPropertiesSkift() {
@@ -277,7 +211,7 @@ class PropertyViewModel : ViewModel() {
             listOf()
         }
 
-        propertiesSkift.addAll(items)
+        totalList.addAll(items)
     }
 
     private fun getPropertiesOgn() {
@@ -288,7 +222,7 @@ class PropertyViewModel : ViewModel() {
             listOf()
         }
 
-        propertiesOgn.addAll(items)
+        totalList.addAll(items)
     }
 
 
@@ -316,17 +250,82 @@ class PropertyViewModel : ViewModel() {
 
         property.score = (property.priceIncomeAgeRatio + property.priceIncomeRatio) / 2
 
-        if(property.score < 1.0){
-            property.showScore = false;
+        if (property.score < 1.0) {
+            property.showScore = false
         }
 
-        if(property.score > 10){
-            property.showScore = false;
+        if (property.score > 10) {
+            property.showScore = false
+        }
+
+        if (property.city.isEmpty()) {
+            property.showScore = false
+        }
+
+        if (property.propertyType == PropertyType.Land) {
+            property.showScore = false
+        }
+
+        if (property.propertyType == PropertyType.Shed) {
+            property.showScore = false
+        }
+    }
+
+    private fun fetch() {
+        if (loaded) {
+            return
+        }
+
+        _viewState.value = _viewState.value.copy(loading = true)
+        CoroutineScope(Dispatchers.IO).launch {
+
+            getHouseHoldIncome()
+            getPropertiesOgn()
+            getPropertiesSkyn()
+            getPropertiesMeklarin()
+            getPropertiesBetri()
+            getPropertiesSkift()
+
+            for (p in totalList) {
+                calculateIncomePriceRatio(houseHoldIncome, p)
+                calculateIncomeBidRatio(income = houseHoldIncome, property = p)
+                calculateFairPrice(income = houseHoldIncome, property = p)
+            }
+
+            displayList.addAll(totalList)
+            cityList.add(filterAll)
+            for (s in cityList) {
+                println(s)
+            }
+            val newCities = displayList.map { it.city }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .filterNot { it in cityList }
+
+            cityList.addAll(newCities)
+
+            cityList.sort()
+
+            for (s in cityList) {
+                println(s)
+            }
+            loaded = true
+            withContext(Dispatchers.Main) {
+                _viewState.value = _viewState.value.copy(
+                    loading = false,
+                    properties = displayList,
+                    cityFilters = cityList,
+                    selectedCity = selectedCity,
+                    selectedPriceRange = selectedPriceRange,
+                    selectedBroker = selectedBroker,
+                    brokerList = Constants.brokerList
+                )
+            }
         }
     }
 
     private fun calculateIncomeBidRatio(income: Double, property: Property) {
-        if (!property.biddingActive) {
+        if (!property.hasBid()) {
             return
         }
 
@@ -394,7 +393,8 @@ class PropertyViewModel : ViewModel() {
     }
 
     sealed class Action {
-        data object LoadUsers : Action()
+        data object LoadProperties : Action()
+        data object Refresh : Action()
         data class FilterCity(val city: String) : Action()
         data class FilterPrice(val priceRange: PriceRange) : Action()
         data class FilterBroker(val broker: String) : Action()
@@ -412,6 +412,8 @@ class PropertyViewModel : ViewModel() {
         val brokerList: List<String> = listOf(),
         val bidActive: Boolean = false,
         val selectedProperty: Property? = null,
+        val rejectedBids: String = "",
+        val activeBids: String = ""
     )
 
 }

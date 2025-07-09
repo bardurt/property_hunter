@@ -18,7 +18,9 @@ import androidx.compose.ui.unit.sp
 import com.bardur.domus.R
 
 @Composable
-fun InfoCard(count: Int) {
+fun InfoCard(count: Int,
+             bids : String,
+             rejectedBids : String) {
     Card(
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -36,7 +38,7 @@ fun InfoCard(count: Int) {
                 painter = painterResource(id = R.drawable.app_icon),
                 contentDescription = "App Icon",
                 modifier = Modifier
-                    .size(128.dp)
+                    .size(96.dp)
                     .padding(bottom = 8.dp)
             )
 
@@ -44,6 +46,17 @@ fun InfoCard(count: Int) {
                 text = "Listings found: $count",
                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
             )
+
+            if(bids.isNotEmpty()){
+                Text(
+                    text = "Bids: $bids",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
+                )
+                Text(
+                    text = "Rejected Bids: $rejectedBids",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
+                )
+            }
         }
     }
 }

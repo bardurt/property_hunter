@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -119,8 +120,9 @@ fun FilterBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Active Bids",
+                        text = "Bids",
                         style = MaterialTheme.typography.bodyMedium,
+                        color = ButtonDefaults.textButtonColors().contentColor
                     )
                     Switch(
                         checked = bidStatus,
