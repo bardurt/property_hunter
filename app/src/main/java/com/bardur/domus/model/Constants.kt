@@ -7,7 +7,7 @@ object Constants {
         AreaCost("Eiði", 3.8, pricePerMeterMax = 0.0, pricePerMeterMin = 0.0),
         AreaCost("Froðba", 2.5, pricePerMeterMax = 0.0, pricePerMeterMin = 0.0),
         AreaCost("Funningur", 3.2, pricePerMeterMax = 0.0, pricePerMeterMin = 0.0),
-        AreaCost("Glyvrar", 3.8, pricePerMeterMax = 0.0, pricePerMeterMin = 0.0),
+        AreaCost("Glyvrar", 4.1, pricePerMeterMax = 0.0, pricePerMeterMin = 0.0),
         AreaCost("Hoyvík", 5.0, pricePerMeterMax = 0.0, pricePerMeterMin = 0.0),
         AreaCost("Hvalba", 2.3, pricePerMeterMax = 0.0, pricePerMeterMin = 0.0),
         AreaCost("Hvalvík", 3.4, pricePerMeterMax = 0.0, pricePerMeterMin = 0.0),

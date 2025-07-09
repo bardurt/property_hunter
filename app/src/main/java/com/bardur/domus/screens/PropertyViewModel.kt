@@ -292,12 +292,11 @@ class PropertyViewModel : ViewModel() {
                 calculateFairPrice(income = houseHoldIncome, property = p)
             }
 
-            displayList.addAll(totalList)
             cityList.add(filterAll)
             for (s in cityList) {
                 println(s)
             }
-            val newCities = displayList.map { it.city }
+            val newCities = totalList.map { it.city }
                 .filter { it.isNotBlank() }
                 .distinct()
                 .filterNot { it in cityList }
@@ -310,6 +309,12 @@ class PropertyViewModel : ViewModel() {
                 println(s)
             }
             loaded = true
+
+            val sortedList = totalList.sortedByDescending {
+                it.showScore && it.hasBid() && !it.isBidRejected()
+            }
+
+            displayList.addAll(sortedList)
             withContext(Dispatchers.Main) {
                 _viewState.value = _viewState.value.copy(
                     loading = false,

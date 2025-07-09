@@ -400,6 +400,10 @@ object SkynApi : PropertyApi {
                 buildYear = ""
             }
 
+            if(buildYear.contains("/")){
+                buildYear = buildYear.split("/")[0]
+            }
+
             val latestBid = el.select(".latest-bid .latestoffer").text().replace(".", "")
             val validUntil = el.select(".latest-bid .validto").text().removePrefix("galdandi til ")
             val listPrice = el.select(".latest-bid .listprice").text().replace(".", "")
