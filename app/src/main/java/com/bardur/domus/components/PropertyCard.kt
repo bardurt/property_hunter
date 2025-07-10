@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -74,14 +72,16 @@ fun PropertyCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clickable(enabled = true, onClick = {onDetailsClick()})
+                    .clickable(enabled = true, onClick = { onDetailsClick() })
             )
 
             if (property.showScore) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.weight(1f)){
-                        AffordabilityHeatBar(property.score,
-                            modifier = Modifier.fillMaxWidth())
+                    Box(Modifier.weight(1f)) {
+                        AffordabilityHeatBar(
+                            property.score,
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                     IconButton(onClick = { onInfoClick() }) {
                         androidx.compose.material3.Icon(
@@ -95,7 +95,7 @@ fun PropertyCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            if(property.address.isNotEmpty()) {
+            if (property.address.isNotEmpty()) {
                 Text(
                     text = property.address,
                     style = MaterialTheme.typography.titleMedium,
@@ -103,7 +103,7 @@ fun PropertyCard(
                 )
             }
 
-            if(property.city.isNotEmpty()) {
+            if (property.city.isNotEmpty()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     androidx.compose.material3.Icon(
                         imageVector = Icons.Sharp.Place,

@@ -13,14 +13,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bardur.domus.R
 
 @Composable
-fun InfoCard(count: Int,
-             bids : String,
-             rejectedBids : String) {
+fun InfoCard(
+    count: Int,
+    bids: String,
+    rejectedBids: String
+) {
     Card(
         shape = MaterialTheme.shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
@@ -43,13 +46,13 @@ fun InfoCard(count: Int,
             )
 
             Text(
-                text = "Listings found: $count",
+                text = stringResource(R.string.listings_found) + ": $count",
                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
             )
 
-            if(bids.isNotEmpty()){
+            if (bids.isNotEmpty()) {
                 Text(
-                    text = "Bids: $bids",
+                    text = stringResource(R.string.bids) + ": $bids",
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 20.sp)
                 )
                 Text(

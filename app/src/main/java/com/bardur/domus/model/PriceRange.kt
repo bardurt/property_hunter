@@ -1,6 +1,6 @@
 package com.bardur.domus.model
 
-enum class PriceRange(val displayName: String, val range: ClosedFloatingPointRange<Double>) {
+enum class PriceRange(val displayName: String, private val range: ClosedFloatingPointRange<Double>) {
     ALL("All", 0.0..Double.MAX_VALUE),
     LOW("Low (1 - 4)", 0.0..4.0),
     MEDIUM("Fair (4 - 6)", 4.0..6.0),

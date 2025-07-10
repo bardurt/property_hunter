@@ -5,7 +5,6 @@ import com.bardur.domus.model.PropertyType
 import org.json.JSONArray
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
-import java.net.URLDecoder
 
 interface PropertyApi {
     fun getProperties(): List<Property>
@@ -168,7 +167,7 @@ object SkiftApi : PropertyApi {
                     println("Build year not found.")
                 }
 
-                var size = extractFirstSize(sizesSection.toString()) ?: ""
+                val size = extractFirstSize(sizesSection.toString()) ?: ""
 
                 imageUrl = imageSection?.selectFirst("img")?.attr("src") ?: ""
                 address = addressSection?.selectFirst("h5")?.text()?.trim() ?: ""

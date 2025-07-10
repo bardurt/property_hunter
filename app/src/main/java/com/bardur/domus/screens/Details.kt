@@ -1,7 +1,6 @@
 package com.bardur.domus.screens
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,9 +17,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.bardur.domus.components.AffordabilityBadge
@@ -28,6 +27,7 @@ import com.bardur.domus.model.Property
 import java.text.NumberFormat
 import java.util.*
 import androidx.core.net.toUri
+import com.bardur.domus.R
 
 @Composable
 fun DetailsScreen(
@@ -49,7 +49,7 @@ fun DetailsScreen(
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("Property not found.")
+            Text(stringResource(R.string.property_not_found))
         }
     }
 }
@@ -89,7 +89,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SectionTitle("Broker")
+        SectionTitle(stringResource(R.string.broker))
         Text(
             text = property.broker,
             style = MaterialTheme.typography.bodyMedium
@@ -97,7 +97,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SectionTitle("Price Information")
+        SectionTitle(stringResource(R.string.price_information))
 
         val listPrice = property.listPrice.toDoubleOrNull()
         val formattedPrice = listPrice?.let {
@@ -105,7 +105,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
         }?.replace(",", ".") ?: "N/A"
 
         Text(
-            text = "List Price: $formattedPrice kr.",
+            text = stringResource(R.string.list_price) + ": $formattedPrice " + stringResource(R.string.kr),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.secondary
@@ -123,7 +123,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
             }
 
             Text(
-                text = "Price per meter: ${formattedPricePerMeter} kr.",
+                text = stringResource(R.string.price_per_meter) + ": $formattedPricePerMeter" + stringResource(R.string.kr),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.secondary
@@ -140,16 +140,18 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                 "N/A"
             }
 
-            if (formattedFairPrice.equals("N/A")) {
+            if (formattedFairPrice == "N/A") {
                 Text(
-                    text = "Fair Price: $formattedFairPrice",
+                    text = stringResource(R.string.fair_price) + ": $formattedFairPrice",
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.tertiary
                 )
             } else {
                 Text(
-                    text = "Fair Price: $formattedFairPrice kr.",
+                    text = stringResource(R.string.fair_price) + ": $formattedFairPrice " + stringResource(
+                        R.string.kr
+                    ),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.tertiary
@@ -167,7 +169,6 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                 "N/A"
             }
 
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = modifier
@@ -175,7 +176,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                     .padding(vertical = 4.dp)
             ) {
                 Text(
-                    text = "Build Year",
+                    text = stringResource(R.string.build_year),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f)
                 )
@@ -194,13 +195,13 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                     .padding(vertical = 4.dp)
             ) {
                 Text(
-                    text = "Property Age",
+                    text = stringResource(R.string.property_age),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.weight(1f)
                 )
 
                 Text(
-                    text = "$age years",
+                    text = "$age " + stringResource(R.string.years),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -215,22 +216,22 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
             ) {
-                SectionTitle("Affordability Metrics")
+                SectionTitle(stringResource(R.string.affordability_metrics))
 
                 MetricRow(
-                    label = "Price / Household Income",
+                    label = stringResource(R.string.price_household_income),
                     value = property.priceIncomeRatio,
                     badgeValue = property.priceIncomeRatio
                 )
 
                 MetricRow(
-                    label = "Age-adjusted Price / Household Income",
+                    label = stringResource(R.string.age_adjusted_price_household_income),
                     value = property.priceIncomeAgeRatio,
                     badgeValue = property.priceIncomeAgeRatio
                 )
 
                 MetricRow(
-                    label = "Score",
+                    label = stringResource(R.string.score),
                     value = property.score,
                     badgeValue = property.score
                 )
@@ -256,7 +257,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                         context.startActivity(intent)
                     }
                 ) {
-                    Text("See more")
+                    Text(stringResource(R.string.see_more))
                 }
             }
         }
@@ -307,7 +308,11 @@ fun BidInfo(property: Property) {
                 "%.2f",
                 kotlin.math.abs(percentDifference)
             )
-        }% ${if (percentDifference >= 0) "above" else "below"} list price"
+        }% ${if (percentDifference >= 0) stringResource(R.string.above) else stringResource(R.string.below)} ${
+            stringResource(
+                R.string.list_price
+            )
+        }"
     } else {
         "N/A"
     }
@@ -332,7 +337,7 @@ fun BidInfo(property: Property) {
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text = "Bid Information",
+                text = stringResource(R.string.bid_information),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = textColor
@@ -344,14 +349,14 @@ fun BidInfo(property: Property) {
         if (isActiveBid) {
             if (isRejected) {
                 Text(
-                    text = "Rejected Bid",
+                    text = stringResource(R.string.rejected_bid),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = textColor
                 )
             } else {
                 Text(
-                    text = "Active Bidding",
+                    text = stringResource(R.string.active_bidding),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = textColor
@@ -361,13 +366,13 @@ fun BidInfo(property: Property) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Rejected",
+                    contentDescription = stringResource(R.string.rejected),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(16.dp)
                 )
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    text = "Bid rejected",
+                    text = stringResource(R.string.bid_rejected),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold
@@ -383,7 +388,7 @@ fun BidInfo(property: Property) {
         Spacer(Modifier.height(4.dp))
 
         Text(
-            text = "Latest Bid: $formattedPrice kr.",
+            text = stringResource(R.string.latest_bid) + ": $formattedPrice" + stringResource(R.string.kr),
             style = MaterialTheme.typography.bodyMedium,
             color = textColor,
             fontWeight = FontWeight.Medium
@@ -392,14 +397,14 @@ fun BidInfo(property: Property) {
         if (!isRejected && property.bidValidUntil.isNotEmpty()) {
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Valid Until: ${property.bidValidUntil}",
+                text = stringResource(R.string.valid_until) + ": ${property.bidValidUntil}",
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor
             )
         } else {
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Status: Rejected",
+                text = stringResource(R.string.status) + ":" + stringResource(R.string.rejected),
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor
             )
@@ -410,7 +415,7 @@ fun BidInfo(property: Property) {
         val buyerType = classifyBuyer(bidAmount, listPrice)
 
         Text(
-            text = "Buyer Type: $buyerType",
+            text = stringResource(R.string.buyer_type) + ": $buyerType",
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
             color = when (buyerType) {
@@ -422,7 +427,7 @@ fun BidInfo(property: Property) {
         )
 
         Text(
-            text = "Bid Difference: $formattedDifference",
+            text = stringResource(R.string.bid_difference) + ": $formattedDifference",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -430,7 +435,7 @@ fun BidInfo(property: Property) {
 
         if (property.bidIncomeRatio > 0) {
             MetricRow(
-                label = "Bid to Income Ratio",
+                label = stringResource(R.string.bid_to_income_ratio),
                 value = property.bidIncomeRatio,
                 badgeValue = property.bidIncomeRatio
             )
@@ -442,8 +447,8 @@ fun classifyBuyer(bidAmount: Double, listPrice: Double): String {
     if (bidAmount > 0 && listPrice > 0) {
         val percentDiff = ((bidAmount - listPrice) / listPrice) * 100
         return when {
-            percentDiff <= -15.0 -> "Lowball"
-            percentDiff < -2.0 -> "Passive"
+            percentDiff <= -20.0 -> "Lowball"
+            percentDiff < -5.0 -> "Passive"
             percentDiff < 5.0 -> "Fair"
             percentDiff < 15.0 -> "Aggressive"
             else -> "Very Aggressive"
@@ -455,12 +460,12 @@ fun classifyBuyer(bidAmount: Double, listPrice: Double): String {
 
 @Composable
 fun MetricRow(
+    modifier: Modifier = Modifier,
     label: String,
     value: Double?,
     badgeValue: Double? = null,
     badgeSize: Int = 20,
     unit: String = "",
-    modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,

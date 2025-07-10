@@ -106,7 +106,7 @@ class PropertyViewModel : ViewModel() {
         var activeBids = ""
         var rejectedBids = ""
         if (filterBid) {
-            filterd2 = filtered.filter { it.hasBid() }
+            filterd2 = filterd2.filter { it.hasBid() }
             filterd2 = filterd2.sortedBy { it.isBidRejected() }
 
             activeBids = filterd2.size.toString()

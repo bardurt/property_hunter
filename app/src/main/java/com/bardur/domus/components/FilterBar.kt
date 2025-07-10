@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -17,9 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.bardur.domus.R
 import com.bardur.domus.model.PriceRange
-
 
 
 @Composable
@@ -56,7 +56,7 @@ fun FilterBar(
                 contentAlignment = Alignment.Center
             ) {
                 DropdownMenuFilter(
-                    label = "City",
+                    label = stringResource(R.string.area),
                     options = cities,
                     selectedOption = selectedCity,
                     onOptionSelected = { onCitySelected(it) },
@@ -75,11 +75,11 @@ fun FilterBar(
                 contentAlignment = Alignment.Center
             ) {
                 DropdownMenuFilter(
-                    label = "Broker",
+                    label = stringResource(R.string.broker),
                     options = brokers,
                     selectedOption = selectedBroker,
-                    onOptionSelected = { onBrokerSelected(it.toString()) },
-                    optionToString = { it ?: "All" },
+                    onOptionSelected = { onBrokerSelected(it) },
+                    optionToString = { it },
                 )
             }
         }
@@ -99,11 +99,11 @@ fun FilterBar(
                     .padding(4.dp), contentAlignment = Alignment.Center
             ) {
                 DropdownMenuFilter(
-                    label = "Score",
+                    label = stringResource(R.string.score),
                     options = PriceRange.entries,
                     selectedOption = selectedPriceRange,
-                    onOptionSelected = { onPriceRangeSelected(it ?: PriceRange.ALL) },
-                    optionToString = { it.displayName ?: "All" }
+                    onOptionSelected = { onPriceRangeSelected(it) },
+                    optionToString = { it.displayName }
                 )
             }
 
@@ -120,7 +120,7 @@ fun FilterBar(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = "Bids",
+                        text = stringResource(R.string.bids),
                         style = MaterialTheme.typography.bodyMedium,
                         color = ButtonDefaults.textButtonColors().contentColor
                     )

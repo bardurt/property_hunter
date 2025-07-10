@@ -37,9 +37,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.bardur.domus.R
 import com.bardur.domus.components.FilterBar
 import com.bardur.domus.components.InfoCard
 import com.bardur.domus.components.PropertyCardShimmer
@@ -89,7 +91,7 @@ fun MainScreen(navController: NavController, viewModel: PropertyViewModel) {
                 modifier = Modifier.padding(horizontal = 8.dp)
             ) {
                 Text(
-                    text = "Filters",
+                    text = stringResource(R.string.filters),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.weight(1f)
@@ -227,11 +229,11 @@ fun PropertyInfoDialog(property: Property, onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("OK")
+                Text(stringResource(R.string.ok))
             }
         },
         title = {
-            Text(text = "Score Info")
+            Text(text = stringResource(R.string.score_info))
         },
         text = {
             Column {
@@ -312,13 +314,15 @@ fun EmptyStateScreen(
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.padding(32.dp).fillMaxWidth()
+        modifier = modifier
+            .padding(32.dp)
+            .fillMaxWidth()
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "No properties found.",
+                text = stringResource(R.string.no_properties_found),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
