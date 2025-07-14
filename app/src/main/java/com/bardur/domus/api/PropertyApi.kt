@@ -144,8 +144,8 @@ object SkiftApi : PropertyApi {
 
                 var address: String
                 var price: String
-                val latestBid = ""
-                val latestBidValidity = ""
+                var latestBid = ""
+                var latestBidValidity = ""
                 var buildYear = ""
                 var imageUrl: String
 
@@ -155,6 +155,27 @@ object SkiftApi : PropertyApi {
                 val imageSection = child?.selectFirst("div.property-card--image-container")
                 val sizesSection = child?.selectFirst("div.property-card--sizes")
 
+
+                val bidRow = pricesSection?.select("div.property-card--price-row")
+
+                if(bidRow != null){
+                    if(bidRow.size > 1){
+                        latestBid = bidRow.select("h5").get(0).text() ?: ""
+
+                        val rows = pricesSection.select("div.property-card--price-row")
+
+                        val secondRow = if(rows.size >= 2){
+                            rows[1]
+                        } else {
+                            null
+                        }
+
+                        secondRow?.let {
+                            val fullText = it.selectFirst("span")?.text()
+                            latestBidValidity = fullText?.substringAfter("Galdandi til:")?.trim() ?: ""
+                        }
+                    }
+                }
 
                 val yearDiv: Element? = sizesSection?.selectFirst(
                     "div.property-card--size:has(img[src=\"https://www.skift.fo/wp-content/themes/kadence-child/images/icon-build-year.svg\"]) > div:nth-of-type(2)"

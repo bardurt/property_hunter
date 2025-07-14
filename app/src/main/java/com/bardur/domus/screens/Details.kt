@@ -102,7 +102,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
         val listPrice = property.listPrice.toDoubleOrNull()
         val formattedPrice = listPrice?.let {
             NumberFormat.getNumberInstance(Locale.US).format(it)
-        }?.replace(",", ".") ?: "N/A"
+        }?.replace(",", ".") ?: stringResource(R.string.n_a)
 
         Text(
             text = stringResource(R.string.list_price) + ": $formattedPrice " + stringResource(R.string.kr),
@@ -119,11 +119,13 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                     .format(pricePerMeter.toInt())
                     .replace(",", ".")
             } else {
-                "N/A"
+                stringResource(R.string.n_a)
             }
 
             Text(
-                text = stringResource(R.string.price_per_meter) + ": $formattedPricePerMeter" + stringResource(R.string.kr),
+                text = stringResource(R.string.price_per_meter) + ": $formattedPricePerMeter " + stringResource(
+                    R.string.kr
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.secondary
@@ -137,10 +139,10 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
                     .format(property.fairPrice)
                     .replace(",", ".")
             } else {
-                "N/A"
+                stringResource(R.string.n_a)
             }
 
-            if (formattedFairPrice == "N/A") {
+            if (formattedFairPrice.length < 3) {
                 Text(
                     text = stringResource(R.string.fair_price) + ": $formattedFairPrice",
                     style = MaterialTheme.typography.bodyLarge,
@@ -166,7 +168,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
             val age = if (buildYear != null && buildYear in 1200..currentYear) {
                 currentYear - buildYear
             } else {
-                "N/A"
+                stringResource(R.string.n_a)
             }
 
             Row(
@@ -240,7 +242,7 @@ fun PropertyDetailsContent(property: Property, modifier: Modifier = Modifier) {
         }
 
         if (property.latestBid.isNotEmpty()) {
-            SectionTitle("Bidding Information")
+            SectionTitle(stringResource(R.string.bidding_information))
             BidInfo(property = property)
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -282,12 +284,6 @@ fun BidInfo(property: Property) {
 
     val isActiveBid = property.hasBid()
     val isRejected = property.isBidRejected()
-
-    val backgroundColor = when {
-        isRejected -> MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
-        isActiveBid -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-        else -> Color.Transparent
-    }
 
     val textColor = when {
         isRejected -> MaterialTheme.colorScheme.error
@@ -383,7 +379,7 @@ fun BidInfo(property: Property) {
         val price = property.latestBid.toDoubleOrNull()
         val formattedPrice = price?.let {
             NumberFormat.getNumberInstance(Locale.US).format(it)
-        }?.replace(",", ".") ?: "N/A"
+        }?.replace(",", ".") ?: stringResource(R.string.n_a)
 
         Spacer(Modifier.height(4.dp))
 
@@ -486,7 +482,7 @@ fun MetricRow(
             )
         } else {
             Text(
-                text = "N/A",
+                text = stringResource(R.string.n_a),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -35,4 +35,6 @@
     <string name="filters">Filters</string>
     <string name="ok">OK</string>
     <string name="score_info">Score Info</string>
+    <string name="n_a">N/A</string>
+    <string name="bidding_information">Bidding Information</string>
 </resources>
