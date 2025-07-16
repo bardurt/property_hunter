@@ -381,7 +381,7 @@ object MeklarinApi : PropertyApi {
                             image = obj.optString("featured_image"),
                             buildYear = year,
                             latestBid = bid,
-                            bidValidUntil = obj.optString("bid_valid_until"),
+                            bidValidUntil = bidValidUntil,
                             listPrice = obj.optString("price").replace(".", ""),
                             broker = "Meklarin",
                             priceIncomeRatio = 0.0,
