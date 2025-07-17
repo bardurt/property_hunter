@@ -432,7 +432,6 @@ object SkynApi : PropertyApi {
 
             val div = img?.parent()
 
-            // Get the text directly inside the div (skipping the <img> and <sup>)
             val ownText = div?.ownText()?.trim()
 
             var size = ownText?.replace("m", "")?.trim() ?: ""
